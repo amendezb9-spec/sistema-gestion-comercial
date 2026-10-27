@@ -40,7 +40,6 @@ def registrar_producto():
     print("¡Error! Debe ingresar un número entero válido para el stock mínimo.")
     return
 
-  # Crear el diccionario del producto y agregarlo a la lista
   nuevo_producto = {
       "codigo": codigo,
       "nombre": nombre,
