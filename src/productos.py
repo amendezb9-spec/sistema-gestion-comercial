@@ -5,7 +5,6 @@ def registrar_producto():
   print(" REGISTRAR NUEVO PRODUCTO ")
   codigo = input("Ingrese el código del producto: ").strip()
 
-  # Validar que el código no esté duplicado
   for p in productos:
     if p["codigo"] == codigo:
       print("¡Error! Ya existe un producto registrado con ese código.")
@@ -14,7 +13,6 @@ def registrar_producto():
   nombre = input("Ingrese el nombre del producto: ").strip()
   categoria = input("Ingrese la categoría: ").strip()
 
-  # Validar precio de venta (debe ser numérico y positivo)
   try:
     precio = float(input("Ingrese el precio de venta: "))
     if precio < 0:
@@ -24,7 +22,6 @@ def registrar_producto():
     print("¡Error! Debe ingresar un valor numérico válido para el precio.")
     return
 
-  # Validar cantidad disponible (debe ser entero y positivo)
   try:
     cantidad = int(input("Ingrese la cantidad disponible: "))
     if cantidad < 0:
@@ -34,7 +31,6 @@ def registrar_producto():
     print("¡Error! Debe ingresar un número entero válido para la cantidad.")
     return
 
-  # Validar stock mínimo (debe ser entero y positivo)
   try:
     stock_minimo = int(input("Ingrese el stock mínimo: "))
     if stock_minimo < 0:
@@ -59,7 +55,7 @@ def registrar_producto():
   print(f"¡Éxito! El producto '{nombre}' se ha registrado correctamente.")
 
 def mostrar_productos():
-  print("\n--- LISTADO DE PRODUCTOS ---")
+  print(" LISTADO DE PRODUCTOS ")
   if not productos:
     print("No hay productos registrados todavía.")
     return
