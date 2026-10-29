@@ -58,7 +58,7 @@ def mostrar_productos():
   if not productos:
     print("No hay productos registrados todavía.")
     return
-*
+
   for p in productos:
     estado = "Activo" if p["activo"] else "Desactivado"
     print(
@@ -77,6 +77,8 @@ VENTAS_FILE = "ventas.json"
 # Datos de prueba el inventario si el archivo no existe 
 INVENTARIO_INICIAL = {
     "001": {"nombre": "Laptop", "precio": 800.00, "existencia": 50},
+    "002" : {"nombre": "Teclado", "precio": 589.50, "existencia": 200}
+
     
             
 } 
