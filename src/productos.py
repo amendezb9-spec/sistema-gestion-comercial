@@ -66,3 +66,17 @@ def mostrar_productos():
         f" {p['categoria']} | Precio: Q{p['precio']:.2f} | Stock:"
         f" {p['cantidad']} (Mín: {p['stock_minimo']}) | Estado: {estado}"
     )
+import json
+import os
+from datetime import datetime 
+
+# Archivo de existencias de datos 
+INVENTARIO_FILE = "inventario.json"
+VENTAS_FILE = "ventas.json"
+
+# Datos de prueba el inventario si el archivo no existe 
+INVENTARIO_INICIAL = {
+    "001": {"nombre": "Laptop", "precio": 800.00, "existencia": 50},
+    
+            
+} 
