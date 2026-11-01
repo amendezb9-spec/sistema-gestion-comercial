@@ -1,0 +1,11 @@
+[
+    {
+        "codido": "P001",
+        "nombre": "Laptop HP",
+        "categoria": "Tecnologia",
+        "precio": 4500.0,
+        "cantidad": 10,
+        "stock_minimo": 2,
+        "activo": true
+    }
+]
