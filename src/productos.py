@@ -45,10 +45,20 @@ def cargar_productos():
 #  Buscar producto por codigo 
 # =============================================================
 
+
+
 def buscar_producto(productos, codigo):
-    for producto in productos: 
-        if producto["codigo"]== codigo: 
+    codigo = str(codigo).strip().upper()
+
+    for producto in productos:
+        if not isinstance(producto, dict):
+            continue
+
+        codigo_guardado = str(producto.get("codigo", "")).strip().upper()
+
+        if codigo_guardado == codigo:
             return producto
+
     return None
 
 
@@ -85,6 +95,8 @@ def leer_numero(mensaje,tipo=float):
 
 def registrar_producto():  
     productos = cargar_productos() 
+    print("DEBUG - Productos cargados:", productos)  
+        
 
     print("\n--- Registrar Producto ---") 
 
@@ -93,9 +105,11 @@ def registrar_producto():
     if not codigo: 
         print("Error: el codigo no puede estar vacio")
         return 
+    print("DEBUG - Codigo ingresado:", repr(codigo)) 
+    print("DEBUG - Resultado busqueda:", buscar_producto(productos, codigo)) 
 
     if buscar_producto(productos, codigo) is not None: 
-        print("Error: ya existe un producto con ese codigo.")
+        print(f"Error: ya existe un producto con ese codigo.")
         return 
     
     nombre = input("Ingrese el nombre:").strip()
@@ -110,7 +124,7 @@ def registrar_producto():
     stock_minimo = leer_numero("Ingrese el stock minimo: ", int) 
 
     nuevo_producto = { 
-        "codido": codigo,
+        "codigo": codigo,
         "nombre": nombre,
         "categoria": categoria, 
         "precio": precio,
@@ -122,10 +136,51 @@ def registrar_producto():
     productos.append(nuevo_producto)
     guardar_productos(productos) 
 
-    print(f"Productos '{nombre}' registrado exitosamente.")  
+    print(f"Productos '{nombre}' registrado exitosamente.")
+
+
+def listar_productos(): 
+    productos = cargar_productos()  
+
+    print("\n===== LISTA DE PRODUCTOS =====")
+
+    if not productos: 
+        print("No hay productos registrados.") 
+        return 
+
+    for producto in productos: 
+        print(f"Codigo: {producto.get('codigo')}") 
+        print(f"Nombre: {producto.get('nombre')}") 
+        print("------------------------")
+
+    # Nuevo menu 
+def menu(): 
+        while True: 
+            print("\n=====Gestion de productos=====")
+            print("1. Registrar producttos")
+            print("2. Consultar productos") 
+            print("3. Lista de productos") 
+            print("4. Modificar producto") 
+            print("5. Desactivar producto")
+            print("0. Regresar al menu principal") 
+
+            opcion = input("Seleccione una opcion: ").strip()
+            print("DEBUG - Opción recibida:", repr(opcion))
+
+
+            if opcion == "1": 
+                registrar_producto() 
+            
+            elif opcion == "0": 
+                break      
+            elif opcion == "3": 
+                listar_productos()
+
+            elif opcion in ("2", "4", "5"): 
+                print("Opcion pendiente de implementacion.") 
+
+            else: 
+                print("Opcion invalida.")
 
 if __name__ == "__main__":
-    registrar_producto() 
-
-  
-
+    menu() 
