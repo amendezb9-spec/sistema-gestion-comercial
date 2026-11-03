@@ -1,0 +1,22 @@
+
+import random
+import string
+
+contrasena = input("Ingrese una contraseña: ")
+
+if len(contrasena) < 8:
+    print("Contraseña débil")
+
+    caracteres = string.ascii_letters + string.digits + "!@#$%"
+    nueva = ""
+
+    for i in range(12):
+        nueva += random.choice(caracteres)
+
+    print("Nueva contraseña fuerte:", nueva)
+
+elif len(contrasena) < 12:
+    print("Contraseña media")
+
+else:
+    print("Contraseña fuerte")
