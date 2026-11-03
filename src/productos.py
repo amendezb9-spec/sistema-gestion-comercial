@@ -1,84 +1,186 @@
 # Lista global para almacenar los productos en memoria
-productos = []
+import json 
+import math  
+from pathlib import Path 
 
-def registrar_producto():
-  print(" REGISTRAR NUEVO PRODUCTO ")
-  codigo = input("Ingrese el código del producto: ").strip()
+# Ubicacion de la carpeta principal del proyecto 
+BASE_DIR = Path (__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data" 
+ARCHIVO_PRODUCTOS = DATA_DIR / "productos.json" 
 
-  for p in productos:
-    if p["codigo"] == codigo:
-      print("¡Error! Ya existe un producto registrado con ese código.")
-      return
+#==========================================================
+# Guardar y cargar productos 
+#==========================================================
+def guardar_productos(productos): 
+    DATA_DIR.mkdir(parents=True, exist_ok=True) 
 
-  nombre = input("Ingrese el nombre del producto: ").strip()
-  categoria = input("Ingrese la categoría: ").strip()
+    with open(ARCHIVO_PRODUCTOS, "w", encoding="utf-8") as archivo: 
+        json.dump(productos, archivo, indent=4, ensure_ascii=False) 
 
-  try:
-    precio = float(input("Ingrese el precio de venta: "))
-    if precio < 0:
-      print("¡Error! El precio no puede ser negativo.")
-      return
-  except ValueError:
-    print("¡Error! Debe ingresar un valor numérico válido para el precio.")
-    return
 
-  try:
-    cantidad = int(input("Ingrese la cantidad disponible: "))
-    if cantidad < 0:
-      print("¡Error! La cantidad no puede ser negativa.")
-      return
-  except ValueError:
-    print("¡Error! Debe ingresar un número entero válido para la cantidad.")
-    return
+def cargar_productos():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)  
 
-  try:
-    stock_minimo = int(input("Ingrese el stock mínimo: "))
-    if stock_minimo < 0:
-      print("¡Error! El stock mínimo no puede ser negativo.")
-      return
-  except ValueError:
-    print("¡Error! Debe ingresar un número entero válido para el stock mínimo.")
-    return
+    if not ARCHIVO_PRODUCTOS.exists(): 
+        guardar_productos([])
+        return []
 
-  nuevo_producto = {
-      "codigo": codigo,
-      "nombre": nombre,
-      "categoria": categoria,
-      "precio": precio,
-      "cantidad": cantidad,
-      "stock_minimo": stock_minimo,
-      "activo": True,  # True para activo, False para desactivado
-  }
+    try: 
+        with open(ARCHIVO_PRODUCTOS, "r", encoding="utf-8") as archivo: 
+            datos = json.load(archivo) 
 
-  productos.append(nuevo_producto)
-  print(f"¡Éxito! El producto '{nombre}' se ha registrado correctamente.")
 
-def mostrar_productos():
-  print(" LISTADO DE PRODUCTOS ")
-  if not productos:
-    print("No hay productos registrados todavía.")
-    return
+        if not isinstance(datos, list): 
+            raise ValueError("El archivo debe contener una lista.") 
 
-  for p in productos:
-    estado = "Activo" if p["activo"] else "Desactivado"
-    print(
-        f"Código: {p['codigo']} | Nombre: {p['nombre']} | Categoría:"
-        f" {p['categoria']} | Precio: Q{p['precio']:.2f} | Stock:"
-        f" {p['cantidad']} (Mín: {p['stock_minimo']}) | Estado: {estado}"
-    )
-import json
-import os
-from datetime import datetime 
+        return datos 
 
-# Archivo de existencias de datos 
-INVENTARIO_FILE = "inventario.json"
-VENTAS_FILE = "ventas.json"
-
-# Datos de prueba el inventario si el archivo no existe 
-INVENTARIO_INICIAL = {
-    "001": {"nombre": "Laptop", "precio": 800.00, "existencia": 50},
-    "002" : {"nombre": "Teclado", "precio": 589.50, "existencia": 200}
-
+    except (json.JSONDecodeError, ValueError) as error: 
+        raise RuntimeError( 
+            f"No se pudo leer productos.json: {error}" 
+        ) from error 
     
+
+#==============================================================
+#  Buscar producto por codigo 
+# =============================================================
+
+
+
+def buscar_producto(productos, codigo):
+    codigo = str(codigo).strip().upper()
+
+    for producto in productos:
+        if not isinstance(producto, dict):
+            continue
+
+        codigo_guardado = str(producto.get("codigo", "")).strip().upper()
+
+        if codigo_guardado == codigo:
+            return producto
+
+    return None
+
+
+#==============================================================
+# Validar Precios y Cantidades 
+#==============================================================
+
+def leer_numero(mensaje,tipo=float): 
+    while True: 
+
+        try: 
+            valor = tipo(input(mensaje)) 
+
+            if valor < 0: 
+                print("Error: no se permiten valores negativos. intente nuevamente.")
+                continue 
+
+            if tipo == float and not math.isfinite(valor): 
+                print("Error: ingrese un numero valido. intente nuevamente.")
+                continue 
+
+            return valor 
+        except ValueError: 
+            print("Error: debe ingresar un numero valido") 
             
-} 
+            
+            
+
+
+
+#==============================================================
+# Registrar Producto 
+#==============================================================
+
+def registrar_producto():  
+    productos = cargar_productos() 
+    print("DEBUG - Productos cargados:", productos)  
+        
+
+    print("\n--- Registrar Producto ---") 
+
+    codigo = input("Ingrese el codigo:").strip().upper()
+
+    if not codigo: 
+        print("Error: el codigo no puede estar vacio")
+        return 
+    print("DEBUG - Codigo ingresado:", repr(codigo)) 
+    print("DEBUG - Resultado busqueda:", buscar_producto(productos, codigo)) 
+
+    if buscar_producto(productos, codigo) is not None: 
+        print(f"Error: ya existe un producto con ese codigo.")
+        return 
+    
+    nombre = input("Ingrese el nombre:").strip()
+    categoria = input("Ingrese la categoria: ").strip()
+
+    if not nombre or not categoria:
+        print("Error: nombre y categoria son obligatorios.")
+        return 
+
+    precio = leer_numero("Ingrese el precio Q: ", float)
+    cantidad = leer_numero("Ingrese la cantidad disponible: ", int) 
+    stock_minimo = leer_numero("Ingrese el stock minimo: ", int) 
+
+    nuevo_producto = { 
+        "codigo": codigo,
+        "nombre": nombre,
+        "categoria": categoria, 
+        "precio": precio,
+        "cantidad": cantidad, 
+        "stock_minimo": stock_minimo,
+        "activo": True 
+    }
+
+    productos.append(nuevo_producto)
+    guardar_productos(productos) 
+
+    print(f"Productos '{nombre}' registrado exitosamente.")
+
+
+def listar_productos(): 
+    productos = cargar_productos()  
+
+    print("\n===== LISTA DE PRODUCTOS =====")
+
+    if not productos: 
+        print("No hay productos registrados.") 
+        return 
+
+    for producto in productos: 
+        print(f"Codigo: {producto.get('codigo')}") 
+        print(f"Nombre: {producto.get('nombre')}") 
+        print("------------------------")
+
+    # Nuevo menu 
+def menu(): 
+        while True: 
+            print("\n=====Gestion de productos=====")
+            print("1. Registrar producttos")
+            print("2. Consultar productos") 
+            print("3. Lista de productos") 
+            print("4. Modificar producto") 
+            print("5. Desactivar producto")
+            print("0. Regresar al menu principal") 
+
+            opcion = input("Seleccione una opcion: ").strip()
+            print("DEBUG - Opción recibida:", repr(opcion))
+
+
+            if opcion == "1": 
+                registrar_producto() 
+            
+            elif opcion == "0": 
+                break      
+            elif opcion == "3": 
+                listar_productos()
+
+            elif opcion in ("2", "4", "5"): 
+                print("Opcion pendiente de implementacion.") 
+
+            else: 
+                print("Opcion invalida.")
+
+if __name__ == "__main__":
+    menu() 
