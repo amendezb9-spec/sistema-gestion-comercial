@@ -153,6 +153,113 @@ def listar_productos():
         print(f"Nombre: {producto.get('nombre')}") 
         print("------------------------")
 
+
+# ==========================================
+# Consultar producto por codigo
+# ==========================================
+
+def consultar_producto():
+    productos = cargar_productos()
+
+    print("\n===== CONSULTAR PRODUCTO =====")
+
+    codigo = input("Ingrese el codigo del producto: ").strip().upper()
+
+    if not codigo:
+        print("Error: el codigo no puede estar vacio.")
+        return
+
+    producto = buscar_producto(productos, codigo)
+
+    if producto is None:
+        print("No se encontro un producto con ese codigo.")
+        return
+
+    print("\n===== PRODUCTO ENCONTRADO =====")
+    print(f"Codigo: {producto.get('codigo')}")
+    print(f"Nombre: {producto.get('nombre')}")
+    print(f"Categoria: {producto.get('categoria')}")
+    print(f"Precio: Q {producto.get('precio', 0):.2f}")
+    print(f"Cantidad: {producto.get('cantidad')}")
+    print(f"Stock minimo: {producto.get('stock_minimo')}")
+
+    if producto.get("activo", True):
+        print("Estado: Activo")
+    else:
+        print("Estado: Inactivo")
+
+
+
+def modificar_producto():
+    productos = cargar_productos()
+
+    print("\n===== MODIFICAR PRODUCTO =====")
+    codigo = input("Ingrese el codigo del producto: ").strip().upper()
+
+    producto = buscar_producto(productos, codigo)
+
+    if producto is None:
+        print("Error: no se encontro un producto con ese codigo.")
+        return
+
+    print(f"\nProducto encontrado: {producto['nombre']}")
+    print("Presione Enter para conservar el valor actual.")
+
+    nombre = input(f"Nombre [{producto['nombre']}]: ").strip()
+    categoria = input(f"Categoria [{producto['categoria']}]: ").strip()
+
+    if nombre:
+        producto["nombre"] = nombre
+
+    if categoria:
+        producto["categoria"] = categoria
+
+    while True:
+        precio = input(f"Precio [{producto['precio']}]: ").strip()
+
+        if not precio:
+            break
+
+        try:
+            nuevo_precio = float(precio)
+            if not math.isfinite(nuevo_precio) or nuevo_precio < 0:
+                print("Ingrese un precio valido no negativo.")
+                continue
+
+            producto["precio"] = nuevo_precio
+            break
+        except ValueError:
+            print("Error: ingrese un numero valido.")
+
+    for campo, etiqueta in [
+        ("cantidad", "Cantidad"),
+        ("stock_minimo", "Stock minimo")
+    ]:
+        while True:
+            entrada = input(
+                f"{etiqueta} [{producto[campo]}]: "
+            ).strip()
+
+            if not entrada:
+                break
+
+            try:
+                valor = int(entrada)
+
+                if valor < 0:
+                    print("No se permiten cantidades negativas.")
+                    continue
+
+                producto[campo] = valor
+                break
+
+            except ValueError:
+                print("Error: ingrese un numero entero.")
+
+    guardar_productos(productos)
+    print("\nProducto modificado exitosamente.")
+
+
     # Nuevo menu 
 def menu(): 
         while True: 
@@ -173,14 +280,16 @@ def menu():
             
             elif opcion == "0": 
                 break      
-            elif opcion == "3": 
+          
+            elif opcion == "2":
+                consultar_producto()
+            elif opcion == "3":
                 listar_productos()
+            elif opcion == "4":
+                modificar_producto()
 
-            elif opcion in ("2", "4", "5"): 
-                print("Opcion pendiente de implementacion.") 
-
-            else: 
-                print("Opcion invalida.")
-
+            elif opcion == "5":
+                print("Opcion pendiente de implementacion.")
 if __name__ == "__main__":
     menu() 
+    
