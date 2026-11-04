@@ -260,6 +260,44 @@ def modificar_producto():
     print("\nProducto modificado exitosamente.")
 
 
+
+# ==========================================
+# Desactivar producto
+# ==========================================
+
+def desactivar_producto():
+    productos = cargar_productos()
+
+    print("\n===== DESACTIVAR PRODUCTO =====")
+
+    codigo = input("Ingrese el codigo del producto: ").strip().upper()
+
+    if not codigo:
+        print("Error: el codigo no puede estar vacio.")
+        return
+
+    producto = buscar_producto(productos, codigo)
+
+    if producto is None:
+        print("Error: no se encontro el producto.")
+        return
+
+    if not producto.get("activo", True):
+        print("El producto ya esta desactivado.")
+        return
+
+    print(f"\nProducto encontrado: {producto['nombre']}")
+
+    confirmar = input("¿Desea desactivar este producto? (S/N): ").strip().upper()
+
+    if confirmar == "S":
+        producto["activo"] = False
+        guardar_productos(productos)
+        print("Producto desactivado exitosamente.")
+    else:
+        print("Operacion cancelada.")
+
+
     # Nuevo menu 
 def menu(): 
         while True: 
@@ -289,7 +327,6 @@ def menu():
                 modificar_producto()
 
             elif opcion == "5":
-                print("Opcion pendiente de implementacion.")
+             desactivar_producto()
 if __name__ == "__main__":
     menu() 
-    
