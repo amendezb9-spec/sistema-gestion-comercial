@@ -1,5 +1,3 @@
----
-```markdown
 # Manual de Usuario - Sistema de Gestión Comercial
 
 ## 1. Presentación y Propósito del Sistema
