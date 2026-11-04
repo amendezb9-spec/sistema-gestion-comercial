@@ -1,3 +1,4 @@
+---
 ```markdown
 # Manual de Usuario - Sistema de Gestión Comercial
 
