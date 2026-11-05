@@ -94,8 +94,7 @@ def leer_numero(mensaje,tipo=float):
 #==============================================================
 
 def registrar_producto():  
-    productos = cargar_productos() 
-    print("DEBUG - Productos cargados:", productos)  
+    productos = cargar_productos()  
         
 
     print("\n--- Registrar Producto ---") 
@@ -105,8 +104,6 @@ def registrar_producto():
     if not codigo: 
         print("Error: el codigo no puede estar vacio")
         return 
-    print("DEBUG - Codigo ingresado:", repr(codigo)) 
-    print("DEBUG - Resultado busqueda:", buscar_producto(productos, codigo)) 
 
     if buscar_producto(productos, codigo) is not None: 
         print(f"Error: ya existe un producto con ese codigo.")
@@ -298,35 +295,76 @@ def desactivar_producto():
         print("Operacion cancelada.")
 
 
+
+def reactivar_producto():
+    productos = cargar_productos()
+
+    print("\n===== REACTIVAR PRODUCTO =====")
+
+    codigo = input(
+        "Ingrese el codigo del producto: "
+    ).strip().upper()
+
+    if not codigo:
+        print("Error: el codigo no puede estar vacio.")
+        return
+
+    producto = buscar_producto(productos, codigo)
+
+    if producto is None:
+        print("Error: no se encontro el producto.")
+        return
+
+    if producto.get("activo", True):
+        print("El producto ya se encuentra activo.")
+        return
+
+    print(f"\nProducto encontrado: {producto['nombre']}")
+
+    confirmar = input(
+        "¿Desea reactivar este producto? (S/N): "
+    ).strip().upper()
+
+    if confirmar == "S":
+        producto["activo"] = True
+        guardar_productos(productos)
+        print("Producto reactivado exitosamente.")
+    else:
+        print("Operacion cancelada.")
+
+
     # Nuevo menu 
-def menu(): 
-        while True: 
-            print("\n=====Gestion de productos=====")
-            print("1. Registrar producttos")
-            print("2. Consultar productos") 
-            print("3. Lista de productos") 
-            print("4. Modificar producto") 
-            print("5. Desactivar producto")
-            print("0. Regresar al menu principal") 
 
-            opcion = input("Seleccione una opcion: ").strip()
-            print("DEBUG - Opción recibida:", repr(opcion))
+def menu():
+    while True:
+        print("\n===== GESTIÓN DE PRODUCTOS =====")
+        print("1. Registrar producto")
+        print("2. Consultar producto")
+        print("3. Listar productos")
+        print("4. Modificar producto")
+        print("5. Desactivar producto")
+        print("6. Reactivar producto")
+        print("0. Regresar al menú principal")
 
+        opcion = input("Seleccione una opción: ").strip()
 
-            if opcion == "1": 
-                registrar_producto() 
-            
-            elif opcion == "0": 
-                break      
-          
-            elif opcion == "2":
-                consultar_producto()
-            elif opcion == "3":
-                listar_productos()
-            elif opcion == "4":
-                modificar_producto()
+        if opcion == "1":
+            registrar_producto()
+        elif opcion == "2":
+            consultar_producto()
+        elif opcion == "3":
+            listar_productos()
+        elif opcion == "4":
+            modificar_producto()
+        elif opcion == "5":
+            desactivar_producto()
+        elif opcion == "6":
+            reactivar_producto()
+        elif opcion == "0":
+            print("Regresando al menú principal...")
+            break
+        else:
+            print("Error: seleccione una opción válida.")
 
-            elif opcion == "5":
-             desactivar_producto()
 if __name__ == "__main__":
     menu() 
