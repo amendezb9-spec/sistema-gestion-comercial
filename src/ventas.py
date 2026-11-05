@@ -1,10 +1,10 @@
 
-# MODULO 3 - REGISTRO DE VENTAS
+"""Modulo 3: Registro de ventas del sistema comercial."""
 
 import json
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from decimal import Decimal
 
 from productos import (
     cargar_productos,
@@ -19,6 +19,7 @@ ARCHIVO_VENTAS = DATA_DIR / "ventas.json"
 
 # Cargar ventas guardadas
 def cargar_ventas():
+    """Carga las ventas almacenadas en el archivo JSON."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     if not ARCHIVO_VENTAS.exists():
@@ -35,6 +36,7 @@ def cargar_ventas():
 
 # Guardar ventas
 def guardar_ventas(ventas):
+    """Guarda las ventas registradas en un archivo JSON."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     with open(ARCHIVO_VENTAS, "w", encoding="utf-8") as archivo:
@@ -43,11 +45,11 @@ def guardar_ventas(ventas):
 
 # Registrar venta
 def registrar_venta():
+    """Registra una venta y actualiza el inventario."""
     print("\n===== REGISTRAR VENTA =====")
 
     productos = cargar_productos()
     codigo = input("Codigo del producto: ").strip().upper()
-
     producto = buscar_producto(productos, codigo)
 
     if producto is None:
@@ -73,8 +75,12 @@ def registrar_venta():
             return
 
         precio = Decimal(str(producto["precio"]))
-        total = precio * cantidad
 
+        if not precio.is_finite() or precio < 0:
+            print("El precio no es valido.")
+            return
+
+        total = precio * cantidad
         ventas = cargar_ventas()
 
         nueva_venta = {
@@ -86,13 +92,19 @@ def registrar_venta():
             "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
 
-        ventas.append(nueva_venta)
-
-        # Guardar la venta antes de actualizar inventario
-        guardar_ventas(ventas)
-
+        # Actualizar inventario
         producto["cantidad"] = disponible - cantidad
         guardar_productos(productos)
+
+        # Guardar la venta
+        ventas.append(nueva_venta)
+
+        try:
+            guardar_ventas(ventas)
+        except OSError:
+            producto["cantidad"] = disponible
+            guardar_productos(productos)
+            raise
 
         print("\nVenta registrada correctamente.")
         print("Producto:", producto["nombre"])
@@ -103,14 +115,16 @@ def registrar_venta():
         if producto["cantidad"] <= int(producto["stock_minimo"]):
             print("ALERTA: Stock bajo.")
 
-    except (ValueError, TypeError, KeyError):
+    except (ValueError, TypeError, KeyError, InvalidOperation):
         print("Error: verifique los datos ingresados.")
-    except (OSError, json.JSONDecodeError) as error:
+
+    except OSError as error:
         print("Error al guardar o leer datos:", error)
 
 
 # Mostrar ventas
 def mostrar_ventas():
+    """Muestra todas las ventas registradas."""
     print("\n===== LISTADO DE VENTAS =====")
 
     ventas = cargar_ventas()
@@ -124,11 +138,12 @@ def mostrar_ventas():
         print("Fecha:", venta["fecha"])
         print("Producto:", venta["producto"])
         print("Cantidad:", venta["cantidad"])
-        print(f"Total: Q{venta['total']:.2f}")
+        print(f"Total: Q{Decimal(str(venta['total'])):.2f}")
 
 
 # Estadisticas de ventas
 def estadisticas_ventas():
+    """Calcula el total, promedio y estadisticas de ventas."""
     print("\n===== ESTADISTICAS DE VENTAS =====")
 
     ventas = cargar_ventas()
@@ -137,30 +152,40 @@ def estadisticas_ventas():
         print("No hay ventas registradas.")
         return
 
-    totales = [venta["total"] for venta in ventas]
+    totales = [
+        Decimal(str(venta["total"]))
+        for venta in ventas
+    ]
 
-    print(f"Total vendido: Q{sum(totales):.2f}")
-    print(f"Promedio: Q{sum(totales) / len(totales):.2f}")
+    total_general = sum(totales, Decimal("0.00"))
+
+    print(f"Total vendido: Q{total_general:.2f}")
+    print(f"Promedio: Q{total_general / len(totales):.2f}")
     print(f"Venta mas alta: Q{max(totales):.2f}")
     print(f"Venta mas baja: Q{min(totales):.2f}")
 
     try:
-        umbral = float(input("Ingrese el monto para comparar: Q"))
+        umbral = Decimal(
+            input("Ingrese el monto para comparar: Q").strip()
+        )
 
-        if umbral < 0:
-            print("El monto no puede ser negativo.")
+        if not umbral.is_finite() or umbral < 0:
+            print("Ingrese un monto valido no negativo.")
             return
 
-        cantidad = sum(1 for total in totales if total > umbral)
+        cantidad = sum(
+            1 for total in totales if total > umbral
+        )
 
         print("Ventas mayores al monto:", cantidad)
 
-    except ValueError:
+    except InvalidOperation:
         print("Ingrese un monto valido.")
 
 
 # Menu de ventas
 def menu():
+    """Muestra las opciones del modulo de ventas."""
     while True:
         print("\n===== REGISTRO DE VENTAS =====")
         print("1. Registrar venta")
@@ -181,12 +206,13 @@ def menu():
                 estadisticas_ventas()
 
             elif opcion == "0":
+                print("Regresando al menu principal...")
                 break
 
             else:
                 print("Opcion invalida. Intente nuevamente.")
 
-        except (OSError, ValueError, json.JSONDecodeError) as error:
+        except (OSError, ValueError, KeyError, TypeError) as error:
             print("No se pudo completar la operacion:", error)
 
 
