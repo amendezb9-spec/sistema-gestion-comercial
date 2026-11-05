@@ -220,3 +220,6 @@ __marimo__/
 .streamlit/secrets.toml
 
 data_respaldo/
+
+__pycache__/
+*.pyc
